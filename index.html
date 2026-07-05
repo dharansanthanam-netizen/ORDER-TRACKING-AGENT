@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrderBot - Order Tracking Sandbox</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon">📦</div>
+                <div class="header-title">
+                    <h1>OrderBot Sandbox</h1>
+                    <p class="subtitle">AI Order Tracking Assistant Simulator</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="agent-status-badge" id="agent-status-badge">
+                    <span class="status-dot pulsing"></span>
+                    <span class="status-text" id="agent-status-text">OrderBot: Online</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-reset-sandbox">Reset Sandbox</button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-main">
+            <!-- LEFT PANEL: MOCK DATABASE -->
+            <section class="panel panel-left" aria-label="Mock Database">
+                <div class="panel-header">
+                    <h2>🗄️ Mock Order Database</h2>
+                    <button class="btn btn-primary btn-xs" id="btn-add-order">+ Add Order</button>
+                </div>
+                <div class="panel-body">
+                    <!-- Order List -->
+                    <div class="order-list-container">
+                        <h3>Active Orders</h3>
+                        <div class="order-list" id="order-list">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Order Details & Editor Form -->
+                    <div class="order-editor-container">
+                        <h3>Edit Selected Order</h3>
+                        <form id="order-editor-form" class="editor-form">
+                            <input type="hidden" id="edit-order-id">
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-customer-name">Customer Name</label>
+                                    <input type="text" id="edit-customer-name" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-customer-email">Email</label>
+                                    <input type="email" id="edit-customer-email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-customer-phone">Phone</label>
+                                    <input type="text" id="edit-customer-phone" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-status">Status</label>
+                                    <select id="edit-status">
+                                        <option value="placed">Placed</option>
+                                        <option value="confirmed">Confirmed</option>
+                                        <option value="packed">Packed</option>
+                                        <option value="shipped">Shipped</option>
+                                        <option value="out for delivery">Out for Delivery</option>
+                                        <option value="delivered">Delivered</option>
+                                        <option value="delayed">Delayed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                        <option value="returned">Returned</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-carrier">Carrier</label>
+                                    <input type="text" id="edit-carrier">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-tracking">Tracking #</label>
+                                    <input type="text" id="edit-tracking">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-location">Current Location</label>
+                                    <input type="text" id="edit-location">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="edit-eta">Est. Delivery (ETA)</label>
+                                    <input type="text" id="edit-eta">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-promised">Promised Date</label>
+                                    <input type="text" id="edit-promised">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-reason">Status Reason (if delayed/cancelled)</label>
+                                <textarea id="edit-reason" rows="2" placeholder="e.g. Weather delay, customer refused"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-success btn-sm">Save Changes</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-edit">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CENTER PANEL: CHAT INTERFACE -->
+            <section class="panel panel-center" aria-label="OrderBot Chat Window">
+                <div class="chat-header">
+                    <div class="bot-avatar">🤖</div>
+                    <div class="chat-title-info">
+                        <h3>OrderBot</h3>
+                        <p class="chat-status-sub text-success">Active & Ready</p>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button class="btn-icon-clear" id="btn-clear-chat" title="Clear chat history">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="chat-body" id="chat-body">
+                    <!-- Messages will be rendered here dynamically -->
+                </div>
+
+                <!-- Thinking Overlay (Collapsible Agent Thoughts) -->
+                <div class="thoughts-overlay collapsed" id="thoughts-overlay">
+                    <button class="thoughts-toggle" id="thoughts-toggle">
+                        <span class="toggle-icon">▲</span>
+                        <span class="toggle-text">Show Agent Reasoning & Thoughts</span>
+                    </button>
+                    <div class="thoughts-content" id="thoughts-content">
+                        <!-- Step by step thought process of the agent -->
+                        <div class="thought-step"><em>Waiting for customer message...</em></div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <form id="chat-input-form" class="chat-form">
+                        <input type="text" id="chat-user-input" placeholder="Type a message... (e.g., 'where is my order #1001?')" autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary" id="btn-chat-send">Send</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: CONSOLE & HUMAN ESCALATION -->
+            <section class="panel panel-right" aria-label="Developer Console and Human Desk">
+                <!-- Top Half: Live API / Tool execution log -->
+                <div class="console-section">
+                    <div class="panel-header">
+                        <h2>📟 Live Tool Execution Log</h2>
+                        <button class="btn btn-secondary btn-xs" id="btn-clear-console">Clear</button>
+                    </div>
+                    <div class="console-body" id="console-body">
+                        <div class="console-placeholder">// Real-time JSON logs of agent tool calls will stream here...</div>
+                    </div>
+                </div>
+
+                <!-- Bottom Half: Human Escalation Desk -->
+                <div class="escalation-section" id="escalation-section">
+                    <div class="panel-header escalation-header inactive" id="escalation-header-bar">
+                        <h2>🎧 Human Escalation Desk</h2>
+                        <span class="escalation-indicator" id="escalation-indicator">INACTIVE</span>
+                    </div>
+                    <div class="escalation-body">
+                        <!-- Inactive State -->
+                        <div class="escalation-inactive-state" id="escalation-inactive-state">
+                            <div class="inactive-icon">🤝</div>
+                            <p>No active escalations. The bot is fully handling the customer chat.</p>
+                            <p class="sub">Conversations will hand off here automatically if escalation triggers are hit.</p>
+                            <button class="btn btn-secondary btn-sm mt-10" id="btn-trigger-escalation-manual">Force Escalate</button>
+                        </div>
+
+                        <!-- Active State -->
+                        <div class="escalation-active-state hidden" id="escalation-active-state">
+                            <div class="escalation-info-box">
+                                <div class="info-item">
+                                    <span class="info-label">Escalation Reason:</span>
+                                    <span class="info-val" id="escalation-reason-text">Damaged item reported.</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Linked Order ID:</span>
+                                    <span class="info-val" id="escalation-order-id">#1001</span>
+                                </div>
+                            </div>
+                            <div class="human-chat-container">
+                                <h3>Send message to Customer as Human Agent:</h3>
+                                <form id="human-chat-form" class="human-form">
+                                    <textarea id="human-message" rows="3" placeholder="Type response as Support Specialist..." required></textarea>
+                                    <div class="human-actions mt-5">
+                                        <button type="submit" class="btn btn-warning btn-sm">Send Response</button>
+                                        <button type="button" class="btn btn-success btn-sm" id="btn-resolve-escalation">Resolve & Return to Bot</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-backdrop hidden" id="add-order-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Create Mock Order</h2>
+                <button class="btn-close" id="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="create-order-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-order-id">Order ID</label>
+                            <input type="text" id="new-order-id" placeholder="e.g. #1005" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-customer-name">Customer Name</label>
+                            <input type="text" id="new-customer-name" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-customer-email">Email</label>
+                            <input type="email" id="new-customer-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-customer-phone">Phone</label>
+                            <input type="text" id="new-customer-phone" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-status">Status</label>
+                            <select id="new-status">
+                                <option value="placed">Placed</option>
+                                <option value="confirmed" selected>Confirmed</option>
+                                <option value="packed">Packed</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="out for delivery">Out for Delivery</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="delayed">Delayed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-carrier">Carrier</label>
+                            <input type="text" id="new-carrier" placeholder="e.g. FedEx">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-tracking">Tracking Number</label>
+                            <input type="text" id="new-tracking" placeholder="e.g. FX98765">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-location">Current Location</label>
+                            <input type="text" id="new-location" placeholder="e.g. Hub 4, New York">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-eta">Est. Delivery (ETA)</label>
+                            <input type="text" id="new-eta" placeholder="e.g. July 9, 2026">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-promised">Promised Date</label>
+                            <input type="text" id="new-promised" placeholder="e.g. July 9, 2026">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script src="app.js"></script>
+</body>
+</html>
